@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <link rel="stylesheet" href="plyr/custom.css" />
+    <title>Video Player</title>
+</head>
+
+<body>
+    <div onclick="togglePlay(event);"> <!-- video üzerine tıklandığında play/pause yapsın diye -->
+    <video crossorigin id="player" data-poster="plyr/View_From_A_Blue_Moon_Trailer-HD.jpg"> <!-- İŞLEM YAPILACAK -->
+        <source src="plyr/View_From_A_Blue_Moon_Trailer-1080p.mp4" type="video/mp4"> <!-- İŞLEM YAPILACAK -->
+
+        <track kind="captions" label="Türkçe" srclang="tr" src="plyr/sub.tr.vtt" default/><!-- İŞLEM YAPILACAK -->
+        <track kind="captions" label="English" srclang="en" src="plyr/sub.en.vtt" /><!-- İŞLEM YAPILACAK -->
+    </video>
+    </div>
+</body>
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="plyr/custom.js"></script>
+
+</html>

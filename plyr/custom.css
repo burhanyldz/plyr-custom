@@ -1,0 +1,78 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f1f1f1;
+  font-family: Gordito, sans-serif;
+}
+
+.top-menu-container {
+  position: absolute;
+  top: 0;
+  z-index: 10;
+  height: 77px;
+  width: 100%;
+  background: linear-gradient(rgba(0, 0, 0, 0.7490196078), rgba(0, 0, 0, 0));
+  background: var(--plyr-video-controls-background, linear-gradient(rgba(0, 0, 0, 0.7490196078), rgba(0, 0, 0, 0)));
+  transition: top 0.5s;
+}
+
+.floating-button-0 {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  z-index: 10;
+  color: white;
+}
+
+.floating-button-1 {
+  position: absolute;
+  right: 40px;
+  top: 5px;
+  z-index: 10;
+  color: white;
+}
+
+.floating-button-2 {
+  position: absolute;
+  right: 75px;
+  top: 5px;
+  z-index: 10;
+  color: white;
+}
+
+.topic-list-button {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  z-index: 10;
+  color: white;
+}
+
+.top-menu {
+  bottom: unset !important;
+  top: 125% !important;
+}
+.top-menu:after {
+  top: -8px !important;
+  transform: rotate(180deg) !important;
+}
+
+.hidden {
+  top: -100px;
+}
+
+.plyr__progress__marker {
+  bottom: 2px !important;
+  top: unset !important;
+  height: 14px;
+  transform: translate(-50%, 0%);
+  display: block;
+  width: 14px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid white;
+}/*# sourceMappingURL=custom.css.map */
