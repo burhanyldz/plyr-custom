@@ -1,7 +1,6 @@
 var initialized = false;
 var player;
 var currentTime = 0;
-var duration = 0;
 
     var subject = 'Konu Başlığı'; // konu başlığı
     var subTopic = 'Konu Açıklaması'; // konu açıklaması
@@ -50,8 +49,12 @@ var duration = 0;
             subject: subject,
             subTopic: subTopic
         }).then(player => {
-            duration = player.duration; // Duration almak için
+            var duration = player.duration; // Duration almak için
             console.log("duration ", duration);
+            
+            var durationTime = durationToTime(duration);
+            console.log("durationTime ", durationTime);
+            
         });
     });
 
@@ -69,6 +72,14 @@ var duration = 0;
         }
     }
 
+
+    function durationToTime(seconds){
+        if(seconds < 3600){
+            return new Date(seconds * 1000).toISOString().substring(14, 19)
+        }else{
+            return new Date(seconds * 1000).toISOString().substring(11, 19)
+        }
+    }
 
     /* -------------------------------------------------------------------------- */
     /*                                PLAYER İŞLEMLERİ                            */
