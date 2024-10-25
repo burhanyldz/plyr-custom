@@ -1,5 +1,10 @@
 var initialized = false;
-    player;
+var player;
+var currentTime = 0;
+var duration = 0;
+
+    var subject = 'Konu Başlığı'; // konu başlığı
+    var subTopic = 'Konu Açıklaması'; // konu açıklaması
     
     // videonun içerisinde bulunan uygulamalar ve işlemler burada tanımlanır // İŞLEM YAPILACAK
     var applications = [
@@ -37,11 +42,19 @@ var initialized = false;
 
     // sayfa yüklenir yüklenmez playerı başlat
     document.addEventListener('DOMContentLoaded', function () {
+
         initPlayer({
             applications: applications,
             topicListButtonClicked: topicListButtonClicked,
             pauseOnApplication: true, // uygulamaların zamanına gelindiğinde videoyu duraklat
+            subject: subject,
+            subTopic: subTopic
         });
+
+        setTimeout(() => {
+            let playerElement = document.getElementById('player');
+            duration = playerElement.plyr.duration; // Duration almak için
+        }, 1000);
     });
 
 
@@ -77,6 +90,7 @@ var initialized = false;
             clickToPlay: false,
             invertTime: false,
             playsinline: true,
+            
             i18n: { restart: 'Tekrar başlat', rewind: '{seektime}s geri', play: 'Oynat', pause: 'Duraklat', fastForward: '{seektime}s İleri', seek: 'Git', seekLabel: '{currentTime}/{duration}', played: 'Oynatılan', buffered: 'Önbellek', currentTime: 'Şimdiki zaman', duration: 'Süre', volume: 'Ses', mute: 'Sessiz', unmute: 'Ses aç', enableCaptions: 'Altyazıları aç', disableCaptions: 'Altyazıları kapat', download: 'İndir', enterFullscreen: 'Tam ekran', exitFullscreen: 'Tam ekranı kapat', frameTitle: 'Player for {title}', captions: 'Altyazılar', settings: 'Ayarlar', pip: "Resim içinde resim", menuBack: 'Önceki menüye dön', speed: 'Hız', normal: 'Normal', quality: 'Kalite', loop: 'Döngü', start: 'Başlangıç', end: 'Son', all: 'Tümü', reset: 'Sıfırla', disabled: 'Kapalı', enabled: 'Açık', },
             markers: {enabled: true, points: points }
         });
@@ -87,10 +101,22 @@ var initialized = false;
             if (!initialized) {
                 initialized = true;
 
+               
+
                 const player = event.detail.plyr;
                 var playerContainer = document.querySelector('.plyr');
-                var topMenuContainer = document.createElement('div');
 
+                let subjectDiv = document.createElement('div');
+                subjectDiv.classList.add('player_subject');
+                subjectDiv.innerHTML = `<span>${options.subject}</span>`;
+
+                let subTopicDiv = document.createElement('div');
+                subTopicDiv.classList.add('player_sub_topic');
+                subTopicDiv.innerHTML = `<span>${options.subTopic}</span>`;
+                playerContainer.appendChild(subjectDiv);
+                playerContainer.appendChild(subTopicDiv);
+
+                var topMenuContainer = document.createElement('div');
                 var topicListButton = document.createElement('div');
                 topicListButton.innerHTML = `<button class="plyr__controls__item plyr__control" type="button" aria-pressed="false"><svg height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M320-280q17 0 28.5-11.5T360-320q0-17-11.5-28.5T320-360q-17 0-28.5 11.5T280-320q0 17 11.5 28.5T320-280Zm0-160q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Zm120 320h240v-80H440v80Zm0-160h240v-80H440v80Zm0-160h240v-80H440v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg><span class="plyr__sr-only">Resim içinde resim</span></button>`;
                 topicListButton.addEventListener('click', options.topicListButtonClicked);
@@ -147,12 +173,16 @@ var initialized = false;
                     captionButton.parentNode.insertBefore(topicListButton, captionButton);
                 }
 
+                player.on('play', event => {
+                    subjectDiv.style.display = 'none';
+                    subTopicDiv.style.display = 'none';
+                });
                 
 
                 if(pauseOnApplication){
+   
                     player.on('timeupdate', event => {
-                        var currentTime = parseInt(event.detail.plyr.currentTime);
-                        
+                        currentTime = parseInt(event.detail.plyr.currentTime);
                         applications.forEach(application => {
                             if(!application.stoppedBefore && application.pauseOnTime){
                                 if(currentTime == application.marker.time){
@@ -162,12 +192,15 @@ var initialized = false;
                                 }
                             }
                         });
+                        
                     });
                 }
                 
             }
 
         });
+        return player;
+
     }
 
     /* -------------------------------------------------------------------------- */
