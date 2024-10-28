@@ -1,4 +1,5 @@
 var initialized = false;
+var firstPlay = false;
 var player;
 var currentTime = 0;
 
@@ -14,7 +15,7 @@ var applications = [
     },
     pauseOnTime: true,
     marker: {
-      time: 10, // saniye
+      time: 50, // saniye
       label: "İşaretçi Başlığı 1",
     },
   },
@@ -25,7 +26,7 @@ var applications = [
     },
     pauseOnTime: true,
     marker: {
-      time: 28, // saniye
+      time: 68, // saniye
       label: "İşaretçi Başlığı 2",
     },
   },
@@ -135,8 +136,9 @@ function initPlayer(options) {
     });
 
     player.on("ready", (event) => {
-      console.log("ready ");
-      resolve(player);
+      setTimeout(() => {
+        resolve(player);
+      }, 1000);
       if (!initialized) {
         initialized = true;
 
@@ -155,14 +157,56 @@ function initPlayer(options) {
 
         var topMenuContainer = document.createElement("div");
         var topicListButton = document.createElement("div");
-        topicListButton.innerHTML = `<button class="plyr__controls__item plyr__control" type="button" aria-pressed="false"><svg height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M320-280q17 0 28.5-11.5T360-320q0-17-11.5-28.5T320-360q-17 0-28.5 11.5T280-320q0 17 11.5 28.5T320-280Zm0-160q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Zm120 320h240v-80H440v80Zm0-160h240v-80H440v80Zm0-160h240v-80H440v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg><span class="plyr__sr-only">Resim içinde resim</span></button>`;
+        topicListButton.innerHTML = `<button class="plyr__controls__item plyr__control" type="button" aria-pressed="false"><svg height="24px" viewBox="0 -960 960 960" width="24px" fill="#e8eaed"><path d="M320-280q17 0 28.5-11.5T360-320q0-17-11.5-28.5T320-360q-17 0-28.5 11.5T280-320q0 17 11.5 28.5T320-280Zm0-160q17 0 28.5-11.5T360-480q0-17-11.5-28.5T320-520q-17 0-28.5 11.5T280-480q0 17 11.5 28.5T320-440Zm0-160q17 0 28.5-11.5T360-640q0-17-11.5-28.5T320-680q-17 0-28.5 11.5T280-640q0 17 11.5 28.5T320-600Zm120 320h240v-80H440v80Zm0-160h240v-80H440v80Zm0-160h240v-80H440v80ZM200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v560q0 33-23.5 56.5T760-120H200Zm0-80h560v-560H200v560Zm0-560v560-560Z"/></svg><span class="plyr__sr-only">Konu listesi</span></button>`;
         topicListButton.addEventListener(
           "click",
           options.topicListButtonClicked
         );
 
-        // EĞER MOBİL İSE EKRAN KÜÇÜKSE
-        if (window.innerWidth < 768) {
+        let videoContainer = document.getElementById("video-container");
+        let width = videoContainer.offsetWidth;
+        let fastForwardArea = document.createElement("div");
+        let fastRewindArea = document.createElement("div");
+
+
+        player.on("play", (event) => {
+          if (!firstPlay) {
+            firstPlay = true;
+            subjectDiv.style.display = "none";
+            subTopicDiv.style.display = "none";
+
+            fastForwardArea.classList.add("fast-forward-area");
+            fastForwardArea.innerHTML = `<button class="" type="button" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" height="34px" viewBox="0 -960 960 960" width="34px" fill="#e8eaed"><path d="M360-320v-180h-60v-60h120v240h-60Zm140 0q-17 0-28.5-11.5T460-360v-160q0-17 11.5-28.5T500-560h80q17 0 28.5 11.5T620-520v160q0 17-11.5 28.5T580-320h-80Zm20-60h40v-120h-40v120ZM480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-800h6l-62-62 56-58 160 160-160 160-56-58 62-62h-6q-117 0-198.5 81.5T200-440q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440h80q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/></svg><span class="plyr__sr-only">İleri Sar</span></button>`;
+            fastForwardArea.addEventListener("click", (event) => {
+              player.currentTime += 10;
+            });
+            playerContainer.appendChild(fastForwardArea);
+
+            fastRewindArea.classList.add("fast-rewind-area");
+            fastRewindArea.innerHTML = `<button class="" type="button" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" height="34px" viewBox="0 -960 960 960" width="34px" fill="#e8eaed"><path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80ZM360-320v-180h-60v-60h120v240h-60Zm140 0q-17 0-28.5-11.5T460-360v-160q0-17 11.5-28.5T500-560h80q17 0 28.5 11.5T620-520v160q0 17-11.5 28.5T580-320h-80Zm20-60h40v-120h-40v120Z"/></svg><span class="plyr__sr-only">Geri Sar</span></button>`;
+            fastRewindArea.addEventListener("click", (event) => {
+              player.currentTime -= 10;
+            });
+            playerContainer.appendChild(fastRewindArea);
+          }
+        });
+
+        if (pauseOnApplication) {
+          player.on("timeupdate", (event) => {
+            currentTime = parseInt(event.detail.plyr.currentTime);
+            applications.forEach((application) => {
+              if (!application.stoppedBefore && application.pauseOnTime) {
+                if (currentTime == application.marker.time) {
+                  application.stoppedBefore = true;
+                  player.pause();
+                  application.actionFx(application.marker);
+                }
+              }
+            });
+          });
+        }
+
+        if (width < 768) {
           var volumeInput = document.querySelector('input[data-plyr="volume"]');
           volumeInput.style.display = "none";
           var captionButton = document.querySelector(
@@ -198,17 +242,7 @@ function initPlayer(options) {
           var playerMenu = document.querySelector(".plyr__menu__container");
           playerMenu.classList.add("top-menu");
 
-          player.on("controlshidden", (event) => {
-            if (topMenuContainer) {
-              topMenuContainer.classList.add("hidden");
-            }
-          });
-
-          player.on("controlsshown", (event) => {
-            if (topMenuContainer) {
-              topMenuContainer.classList.remove("hidden");
-            }
-          });
+          
         } else {
           // add the topic list button to the player before captionButton
           var captionButton = document.querySelector(
@@ -218,25 +252,33 @@ function initPlayer(options) {
           captionButton.parentNode.insertBefore(topicListButton, captionButton);
         }
 
-        player.on("play", (event) => {
-          subjectDiv.style.display = "none";
-          subTopicDiv.style.display = "none";
+        player.on("controlshidden", (event) => {
+          if (topMenuContainer) {
+            topMenuContainer.classList.add("hidden");
+          }
+          if (fastForwardArea) {
+            fastForwardArea.classList.add("hidden");
+          }
+          if(fastRewindArea){
+            fastRewindArea.classList.add("hidden");
+          }
         });
 
-        if (pauseOnApplication) {
-          player.on("timeupdate", (event) => {
-            currentTime = parseInt(event.detail.plyr.currentTime);
-            applications.forEach((application) => {
-              if (!application.stoppedBefore && application.pauseOnTime) {
-                if (currentTime == application.marker.time) {
-                  application.stoppedBefore = true;
-                  player.pause();
-                  application.actionFx(application.marker);
-                }
-              }
-            });
-          });
-        }
+        player.on("controlsshown", (event) => {
+          if (topMenuContainer) {
+            topMenuContainer.classList.remove("hidden");
+          }
+
+          if (fastForwardArea) {
+            fastForwardArea.classList.remove("hidden");
+          }
+
+          if(fastRewindArea){
+            fastRewindArea.classList.remove("hidden");
+          }
+        });
+
+        
       }
     });
   });
