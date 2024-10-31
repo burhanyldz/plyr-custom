@@ -235,7 +235,7 @@ function initPlayer(options) {
 
         let width = playerElement.offsetWidth;
 
-        if (width < 768) {
+        if (width < 543) {
           var volumeInput = document.querySelector('input[data-plyr="volume"]');
           volumeInput.style.display = "none";
 
@@ -250,30 +250,30 @@ function initPlayer(options) {
           var fullscreenButton = document.querySelector(
             'button[data-plyr="fullscreen"]'
           );
-          fullscreenButton.classList.add("floating-button-0");
+          fullscreenButton && fullscreenButton.classList.add("floating-button-0");
           var settingsButton = document.querySelector(".plyr__menu");
-          settingsButton.classList.add("floating-button-1");
+          settingsButton && settingsButton.classList.add("floating-button-1");
           var pipButton = document.querySelector('button[data-plyr="pip"]');
-          pipButton.classList.add("floating-button-2");
+          pipButton && pipButton.classList.add("floating-button-2");
 
           topMenuContainer.classList.add("top-menu-container");
           // add fullscreen button to the top menu
-          topMenuContainer.appendChild(fullscreenButton);
+          fullscreenButton && topMenuContainer.appendChild(fullscreenButton);
           // add settings button to the top menu
-          topMenuContainer.appendChild(settingsButton);
+          settingsButton && topMenuContainer.appendChild(settingsButton);
           // add pip button to the top menu
-          topMenuContainer.appendChild(pipButton);
-          topicListButton.classList.add("topic-list-button");
-          topMenuContainer.appendChild(topicListButton);
+          pipButton && topMenuContainer.appendChild(pipButton);
+          topicListButton && topicListButton.classList.add("topic-list-button");
+          topicListButton && topMenuContainer.appendChild(topicListButton);
 
           // if player container doesnt contain top menu container, add it
           if (!playerContainer.contains(topMenuContainer)) {
             console.log("topMenuContainer added");
-            playerContainer.appendChild(topMenuContainer);
+            topMenuContainer && playerContainer.appendChild(topMenuContainer);
           }
 
           var playerMenu = document.querySelector(".plyr__menu__container");
-          playerMenu.classList.add("top-menu");
+          playerMenu && playerMenu.classList.add("top-menu");
 
           
         } else {
@@ -281,8 +281,8 @@ function initPlayer(options) {
           var captionButton = document.querySelector(
             'button[data-plyr="captions"]'
           );
-          topicListButton.classList.add("plyr__controls__item");
-          captionButton.parentNode.insertBefore(topicListButton, captionButton);
+          topicListButton && topicListButton.classList.add("plyr__controls__item");
+          topicListButton && captionButton.parentNode.insertBefore(topicListButton, captionButton);
         }
 
         player.on("controlshidden", (event) => {
