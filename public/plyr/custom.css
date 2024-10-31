@@ -171,8 +171,8 @@ body {
   height: 70%;
   max-height: 400px;
   transform: translateY(-50%);
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.7490196078), rgba(0, 0, 0, 0));
-  background: var(--plyr-video-controls-background, linear-gradient(to right, rgba(0, 0, 0, 0.5294117647), rgba(0, 0, 0, 0)));
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  background: var(--plyr-video-controls-background, linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0)));
 }
 .fast-rewind-area button {
   background: transparent;

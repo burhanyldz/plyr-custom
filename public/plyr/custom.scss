@@ -142,8 +142,8 @@ body {
     height: 70%;
     max-height: 400px;
     transform: translateY(-50%);
-    background: linear-gradient(to left, #000000bf, #0000);
-    background: var(--plyr-video-controls-background, linear-gradient(to left,#00000087, #0000));
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0,  0,  0,  0));
+    background: var(--plyr-video-controls-background, linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0,  0,  0,  0)));
     
     button{
         background: transparent;
@@ -182,8 +182,8 @@ body {
     height: 70%;
     max-height: 400px;
     transform: translateY(-50%);
-    background: linear-gradient(to right, #000000bf, #0000);
-    background: var(--plyr-video-controls-background, linear-gradient(to right,#00000087, #0000));
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0,  0,  0,  0));
+    background: var(--plyr-video-controls-background, linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0,  0,  0,  0)));
  
     button{
         background: transparent;

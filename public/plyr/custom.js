@@ -235,7 +235,7 @@ function initPlayer(options) {
 
         let width = playerElement.offsetWidth;
 
-        if (width < 543) {
+        if (width < 500) {
           var volumeInput = document.querySelector('input[data-plyr="volume"]');
           volumeInput.style.display = "none";
 
