@@ -11,10 +11,15 @@ body {
 }
 
 #video-container {
+  width: 100%;
+}
+
+.mobile-frame {
   width: 375px;
 }
-#video-container.bigger {
-  width: 768px;
+
+.desktop-frame {
+  width: 800px;
 }
 
 .top-menu-container {

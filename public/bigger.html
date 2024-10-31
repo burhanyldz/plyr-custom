@@ -10,16 +10,20 @@
 </head>
 
 <body>
-    <div id="video-container" class="bigger"  onclick="togglePlay(event);"> <!-- video üzerine tıklandığında play/pause yapsın diye -->
-        <video crossorigin id="player" data-poster="plyr/View_From_A_Blue_Moon_Trailer-HD.jpg"> <!-- İŞLEM YAPILACAK -->
-            <source src="plyr/View_From_A_Blue_Moon_Trailer-1080p.mp4" type="video/mp4"> <!-- İŞLEM YAPILACAK -->
 
-            <track kind="captions" label="Türkçe" srclang="tr" src="plyr/sub.tr.vtt" default/><!-- İŞLEM YAPILACAK -->
-            <track kind="captions" label="English" srclang="en" src="plyr/sub.en.vtt" /><!-- İŞLEM YAPILACAK -->
-        </video>
+    <div class="desktop-frame">
+        <div id="video-container" onclick="togglePlay(event);"> <!-- video üzerine tıklandığında play/pause yapsın diye -->
+            <video crossorigin id="player" data-poster="plyr/View_From_A_Blue_Moon_Trailer-HD.jpg"> <!-- İŞLEM YAPILACAK -->
+                <source src="plyr/View_From_A_Blue_Moon_Trailer-1080p.mp4" type="video/mp4"> <!-- İŞLEM YAPILACAK -->
+    
+                <track kind="captions" label="Türkçe" srclang="tr" src="plyr/sub.tr.vtt" default/><!-- İŞLEM YAPILACAK -->
+                <track kind="captions" label="English" srclang="en" src="plyr/sub.en.vtt" /><!-- İŞLEM YAPILACAK -->
+            </video>
+        </div>
     </div>
+
     <div style="margin-top: 100px;">
-        <a href="/">Mobil Ekran</a>
+        <a href="index.html">Mobil Ekran</a>
     </div>
 
 </body>

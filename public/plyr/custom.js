@@ -2,6 +2,9 @@ var initialized = false;
 var firstPlay = false;
 var player;
 var currentTime = 0;
+var areControlsVisible = true;
+var controlTimeout;
+var hideControls = true;
 
 var subject = "Konu Başlığı"; // konu başlığı
 var subTopic = "Konu Açıklaması"; // konu açıklaması
@@ -15,7 +18,7 @@ var applications = [
     },
     pauseOnTime: true,
     marker: {
-      time: 50, // saniye
+      time: 30, // saniye
       label: "İşaretçi Başlığı 1",
     },
   },
@@ -26,7 +29,7 @@ var applications = [
     },
     pauseOnTime: true,
     marker: {
-      time: 68, // saniye
+      time: 150, // saniye
       label: "İşaretçi Başlığı 2",
     },
   },
@@ -60,11 +63,26 @@ document.addEventListener("DOMContentLoaded", function () {
 togglePlay = function (event) {
   // Videoya tıklanıldığında oynat/duraklat
   event.preventDefault();
-  if (event.target.classList.contains("plyr__poster")) {
-    if (player && player.playing) {
-      player.pause();
-    } else if (player && !player.playing) {
-      player.play();
+  if(event.pointerType == "touch" || event.pointerType == "pen"){
+    if (event.target.classList.contains("plyr__poster")) {
+      if (player && player.playing) {
+        if(areControlsVisible){
+          player.pause();
+        }else{
+          showControls();
+          hideControlsWithDelay();
+        }
+      } else if (player && !player.playing) {
+        player.play();
+      }
+    }
+  }else{
+    if (event.target.classList.contains("plyr__poster")) {
+      if (player && player.playing) {
+        player.pause();
+      } else if (player && !player.playing) {
+        player.play();
+      }
     }
   }
 };
@@ -90,12 +108,17 @@ function initPlayer(options) {
       points.push(application.marker);
     });
 
+    if (isTouchDevice()) {
+      hideControls = false;
+    }
+
     var playerElement = document.getElementById("player");
     player = new Plyr(playerElement, {
       clickToPlay: false,
       invertTime: false,
       playsinline: true,
-
+      hideControls: hideControls,
+      controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'],
       i18n: {
         restart: "Tekrar başlat",
         rewind: "{seektime}s geri",
@@ -163,8 +186,6 @@ function initPlayer(options) {
           options.topicListButtonClicked
         );
 
-        let videoContainer = document.getElementById("video-container");
-        let width = videoContainer.offsetWidth;
         let fastForwardArea = document.createElement("div");
         let fastRewindArea = document.createElement("div");
 
@@ -177,17 +198,23 @@ function initPlayer(options) {
 
             fastForwardArea.classList.add("fast-forward-area");
             fastForwardArea.innerHTML = `<button class="" type="button" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" height="34px" viewBox="0 -960 960 960" width="34px" fill="#e8eaed"><path d="M360-320v-180h-60v-60h120v240h-60Zm140 0q-17 0-28.5-11.5T460-360v-160q0-17 11.5-28.5T500-560h80q17 0 28.5 11.5T620-520v160q0 17-11.5 28.5T580-320h-80Zm20-60h40v-120h-40v120ZM480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440q0-75 28.5-140.5t77-114q48.5-48.5 114-77T480-800h6l-62-62 56-58 160 160-160 160-56-58 62-62h-6q-117 0-198.5 81.5T200-440q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440h80q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80Z"/></svg><span class="plyr__sr-only">İleri Sar</span></button>`;
-            fastForwardArea.addEventListener("click", (event) => {
-              player.currentTime += 10;
-            });
+            fastForwardArea.addEventListener("click", fastForward);
             playerContainer.appendChild(fastForwardArea);
 
             fastRewindArea.classList.add("fast-rewind-area");
             fastRewindArea.innerHTML = `<button class="" type="button" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" height="34px" viewBox="0 -960 960 960" width="34px" fill="#e8eaed"><path d="M480-80q-75 0-140.5-28.5t-114-77q-48.5-48.5-77-114T120-440h80q0 117 81.5 198.5T480-160q117 0 198.5-81.5T760-440q0-117-81.5-198.5T480-720h-6l62 62-56 58-160-160 160-160 56 58-62 62h6q75 0 140.5 28.5t114 77q48.5 48.5 77 114T840-440q0 75-28.5 140.5t-77 114q-48.5 48.5-114 77T480-80ZM360-320v-180h-60v-60h120v240h-60Zm140 0q-17 0-28.5-11.5T460-360v-160q0-17 11.5-28.5T500-560h80q17 0 28.5 11.5T620-520v160q0 17-11.5 28.5T580-320h-80Zm20-60h40v-120h-40v120Z"/></svg><span class="plyr__sr-only">Geri Sar</span></button>`;
-            fastRewindArea.addEventListener("click", (event) => {
-              player.currentTime -= 10;
-            });
+            fastRewindArea.addEventListener("click", fastRewind);
             playerContainer.appendChild(fastRewindArea);
+            
+          }
+          if(!hideControls){
+            hideControlsWithDelay();
+          }
+        });
+
+        player.on("pause", (event) => {
+          if(!hideControls){
+            this.showControls();
           }
         });
 
@@ -206,9 +233,15 @@ function initPlayer(options) {
           });
         }
 
+        let width = playerElement.offsetWidth;
+
         if (width < 768) {
           var volumeInput = document.querySelector('input[data-plyr="volume"]');
           volumeInput.style.display = "none";
+
+          var durationElement = document.querySelector(".plyr__time--duration");
+          durationElement.style.display = "none";
+
           var captionButton = document.querySelector(
             'button[data-plyr="captions"]'
           );
@@ -253,6 +286,7 @@ function initPlayer(options) {
         }
 
         player.on("controlshidden", (event) => {
+          areControlsVisible = false;
           if (topMenuContainer) {
             topMenuContainer.classList.add("hidden");
           }
@@ -265,6 +299,8 @@ function initPlayer(options) {
         });
 
         player.on("controlsshown", (event) => {
+          console.log("controlsshown ");
+          areControlsVisible = true;
           if (topMenuContainer) {
             topMenuContainer.classList.remove("hidden");
           }
@@ -282,6 +318,53 @@ function initPlayer(options) {
       }
     });
   });
+}
+
+function fastForward(){
+  player.currentTime += 10;
+  hideControlsWithDelay();
+}
+
+function fastRewind(){
+  player.currentTime -= 10;
+  hideControlsWithDelay();
+}
+
+function hideControlsWithDelay(){
+
+  if(player && player.playing){
+    clearInterval(controlTimeout);
+    controlTimeout = setTimeout(() => {
+      let isMenuOpen = player.elements.container.classList.contains("plyr--menu-open");
+      if(isMenuOpen){
+        hideControlsWithDelay();
+        return;
+      }    
+      player.toggleControls(false);
+    }, 3000);
+  }
+}
+
+
+
+function hideControlsImmediately(){
+  if(player && player.playing){
+    clearInterval(controlTimeout);
+    player.toggleControls(false);
+  }
+}
+
+function showControls(){
+  if(player){
+    clearInterval(controlTimeout);
+    player.toggleControls(true);
+  }
+}
+
+function isTouchDevice() {
+  return (('ontouchstart' in window) ||
+     (navigator.maxTouchPoints > 0) ||
+     (navigator.msMaxTouchPoints > 0));
 }
 
 /* -------------------------------------------------------------------------- */
