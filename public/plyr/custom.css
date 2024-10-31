@@ -126,7 +126,6 @@ body {
   right: 0;
   top: 50%;
   width: 15%;
-  background-color: rgba(255, 255, 255, 0.1);
   z-index: 18;
   border-radius: 300px 0 0 300px;
   display: flex;
@@ -136,6 +135,8 @@ body {
   height: 70%;
   max-height: 400px;
   transform: translateY(-50%);
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.7490196078), rgba(0, 0, 0, 0));
+  background: var(--plyr-video-controls-background, linear-gradient(to left, rgba(0, 0, 0, 0.5294117647), rgba(0, 0, 0, 0)));
 }
 .fast-forward-area button {
   background: transparent;
@@ -161,7 +162,6 @@ body {
   left: 0;
   top: 50%;
   width: 15%;
-  background-color: rgba(255, 255, 255, 0.1);
   z-index: 18;
   border-radius: 0 300px 300px 0;
   display: flex;
@@ -171,6 +171,8 @@ body {
   height: 70%;
   max-height: 400px;
   transform: translateY(-50%);
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.7490196078), rgba(0, 0, 0, 0));
+  background: var(--plyr-video-controls-background, linear-gradient(to right, rgba(0, 0, 0, 0.5294117647), rgba(0, 0, 0, 0)));
 }
 .fast-rewind-area button {
   background: transparent;
