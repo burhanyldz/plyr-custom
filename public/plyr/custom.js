@@ -371,7 +371,7 @@ function isTouchDevice() {
 document.addEventListener("keydown", function (event) {
 
   // buraya eğer bir modal açıksa boş return döndüren if bloğu eklenecek
-  if(document.querySelector(".modal").classList.contains("show")){
+  if(document.querySelector(".modal") && document.querySelector(".modal").classList.contains("show")){
     return;
   }
 
