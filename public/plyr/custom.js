@@ -367,10 +367,9 @@ function isTouchDevice() {
      (navigator.msMaxTouchPoints > 0));
 }
 
-// add keyboard controls to the player
 document.addEventListener("keydown", function (event) {
 
-  // buraya eğer bir modal açıksa boş return döndüren if bloğu eklenecek
+  // DOĞRU MU? -> buraya eğer bir modal açıksa boş return döndüren if bloğu eklenecek
   if(document.querySelector(".modal") && document.querySelector(".modal").classList.contains("show")){
     return;
   }
@@ -385,40 +384,32 @@ document.addEventListener("keydown", function (event) {
   }
   
   if (event.key === " ") {
-    console.log("space");
     player.togglePlay();
   }
   if (event.key === "ArrowRight") {
-    console.log("arrowRight");
     fastForward();
   }
   if (event.key === "ArrowLeft") {
-    console.log("arrowLeft");
     fastRewind();
   }
   if(event.key === "ArrowUp"){
-    console.log("arrowUp");
     player.volume += 0.1;
   }
   if(event.key === "ArrowDown"){
-    console.log("arrowDown");
     player.volume -= 0.1;
   }
 
   // if full screen active and esc key pressed, exit full screen
   if(event.key === "Escape"){
-    console.log("esc");
     if(player.fullscreen.active){
       player.fullscreen.exit();
     }
   }
 
   if(event.key === "m"){
-    console.log("enter");
     player.muted = !player.muted;
   }
   if(event.key === "f"){
-    console.log("f");
     player.fullscreen.toggle();
   }
 });
