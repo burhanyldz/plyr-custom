@@ -5,6 +5,43 @@ var currentTime = 0;
 var areControlsVisible = true;
 var controlTimeout;
 var hideControls = true;
+var hidePlaceholderCaptionTimeout = null;
+
+var captionSizes = [
+  {percentage: 25, fontSize: "12px"},
+  {percentage: 50, fontSize: "18px"},
+  {percentage: 75, fontSize: "24px"},
+  {percentage: 100, fontSize: "30px"},
+  {percentage: 150, fontSize: "36px"},
+  {percentage: 200, fontSize: "42px"},
+  {percentage: 300, fontSize: "54px"}
+];
+
+captionSizesFullscreen = [
+  {percentage: 25, fontSize: "18px"},
+  {percentage: 50, fontSize: "24px"},
+  {percentage: 75, fontSize: "30px"},
+  {percentage: 100, fontSize: "36px"},
+  {percentage: 150, fontSize: "42px"},
+  {percentage: 200, fontSize: "54px"},
+  {percentage: 300, fontSize: "66px"}
+];
+
+var captionColors = [
+  {hex: "#ffffff", colorText: "Beyaz"},
+  {hex: "#ffff00", colorText: "Sarı"},
+  {hex: "#00ff00", colorText: "Yeşil"},
+  {hex: "#00ffff", colorText: "Camgöbeği"},
+  {hex: "#0000ff", colorText: "Mavi"},
+  {hex: "#ff00ff", colorText: "Pembe"},
+  {hex: "#ff0000", colorText: "Kırmızı"},
+  {hex: "#000000", colorText: "Siyah"},
+];
+var captionSize = {percentage: 50, fontSize: "18px"};
+var captionTextColor = {hex: "#ffffff", colorText: "Beyaz"};
+var captionBackgroundColor = {hex: "#000000", colorText: "Siyah"};
+
+loadLocalStorageSettings();
 
 var subject = "Konu Başlığı"; // konu başlığı
 var subTopic = "Konu Açıklaması"; // konu açıklaması
@@ -234,6 +271,7 @@ function initPlayer(options) {
         }
 
         let width = playerElement.offsetWidth;
+        var playerMenu = document.querySelector(".plyr__menu__container");
 
         if (width < 500) {
           var volumeInput = document.querySelector('input[data-plyr="volume"]');
@@ -272,7 +310,6 @@ function initPlayer(options) {
             topMenuContainer && playerContainer.appendChild(topMenuContainer);
           }
 
-          var playerMenu = document.querySelector(".plyr__menu__container");
           playerMenu && playerMenu.classList.add("top-menu");
 
           
@@ -285,6 +322,11 @@ function initPlayer(options) {
           topicListButton && captionButton.parentNode.insertBefore(topicListButton, captionButton);
         }
 
+        // add caption settings to the player settings menu
+        if(player.currentTrack !== -1){
+          addCaptionSettings();
+        }
+        
         player.on("controlshidden", (event) => {
           areControlsVisible = false;
           if (topMenuContainer) {
@@ -314,10 +356,464 @@ function initPlayer(options) {
           }
         });
 
-        
+        player.on("enterfullscreen", (event) => {
+
+          if(player.currentTrack !== -1){
+            captionSize = captionSizesFullscreen.find((size)=>{ return size.percentage === captionSize.percentage});
+            setCaptionSize(captionSize);
+          }
+        });
+
+        player.on("exitfullscreen", (event) => {
+          if(player.currentTrack !== -1){
+            captionSize = captionSizes.find((size)=>{ return size.percentage === captionSize.percentage});
+            setCaptionSize(captionSize);
+          }
+        });
+
+        player.on("languagechange", (event) => {
+          console.log("languagechange ");
+          setTimeout(() => {
+            addCaptionSettings();
+          }, 100);
+        });
+
+        player.on("captionsenabled", (event) => {
+          console.log("captionsenabled ");
+          setTimeout(() => {
+            addCaptionSettings();
+          }, 100);
+        });
+
+        player.on("captionsdisabled", (event) => {
+          console.log("captionsdisabled ");
+          setTimeout(() => {
+            removeCaptionSettings();
+          }, 100);
+        });
       }
     });
   });
+}
+
+removeCaptionSettings = function(){
+  let playerMenu = document.querySelector(".plyr__menu__container");
+  if(!playerMenu){
+    return;
+  }
+  let menuId = playerMenu.getAttribute("id");
+  let captionSettingsButton = document.getElementById(menuId + "-caption-settings-button");
+  if(captionSettingsButton){
+    captionSettingsButton.remove();
+  }
+}
+
+function addCaptionSettings(){
+
+  var playerMenu = document.querySelector(".plyr__menu__container");
+  if(!playerMenu){
+    return;
+  }
+  let menuId = playerMenu.getAttribute("id");
+  let captionsMenu = document.getElementById(menuId + "-captions");
+  let parentMenu = captionsMenu.parentNode;
+
+  let existingCaptionSettingsButton = document.getElementById(menuId + "-caption-settings-button");
+  if(existingCaptionSettingsButton){
+    return;
+  }
+
+  // get div with role="menu"
+  let menuDiv = captionsMenu.querySelector('[role="menu"]');
+  // prepend a new button to the menu <button data-plyr="caption-settings" type="button" class="plyr__control plyr__control--forward" role="menuitem" aria-haspopup="true"><span>Seçenekler</span></button>
+  let captionSettingsButton = document.createElement("button");
+  captionSettingsButton.setAttribute("data-plyr", "caption-settings");
+  captionSettingsButton.setAttribute("type", "button");
+  captionSettingsButton.classList.add("plyr__control");
+  captionSettingsButton.classList.add("plyr__control--forward");
+  captionSettingsButton.setAttribute("role", "menuitem");
+  captionSettingsButton.setAttribute("aria-haspopup", "true");
+  captionSettingsButton.setAttribute("id", menuId + "-caption-settings-button");
+  captionSettingsButton.innerHTML = "<span>Seçenekler</span>";
+  captionSettingsButton.addEventListener("click", function (event) {
+
+    // add hidden attribute to the children of the parent menu
+    let children = parentMenu.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].setAttribute("hidden", "");
+    }
+    // remove hidden attribute from the caption settings menu
+    let captionSettingsMenu = document.getElementById(menuId + "-caption-settings");
+    captionSettingsMenu.removeAttribute("hidden");
+
+  });
+  menuDiv.prepend(captionSettingsButton);
+
+  // add another menu to the parent of captionsMenu
+  let captionSettingsMenu = document.createElement("div");
+  captionSettingsMenu.setAttribute("id", menuId + "-caption-settings");
+  captionSettingsMenu.setAttribute("hidden", "");
+  //captionSettingsMenu.innerHTML = `<button type="button" class="plyr__control plyr__control--back"><span aria-hidden="true">Seçenekler</span><span class="plyr__sr-only">Önceki menüye dön</span></button><div role="menu"></div>`;
+  let backMenuButton1 = document.createElement("button");
+  backMenuButton1.setAttribute("type", "button");
+  backMenuButton1.classList.add("plyr__control");
+  backMenuButton1.classList.add("plyr__control--back");
+  backMenuButton1.innerHTML = `<span aria-hidden="true">Seçenekler</span><span class="plyr__sr-only">Önceki menüye dön</span>`;
+  backMenuButton1.addEventListener("click", (event)=>{
+    captionSettingsMenu.setAttribute("hidden", "");
+
+    // remove hidden attribute from the captions menu
+    let captionsMenu = document.getElementById(menuId + "-captions");
+    captionsMenu.removeAttribute("hidden");
+  });
+  captionSettingsMenu.appendChild(backMenuButton1);
+
+  let captionSettingsMenuDiv = document.createElement("div");
+  captionSettingsMenuDiv.setAttribute("role", "menu");
+  //captionSettingsMenuDiv.innerHTML = `<button data-plyr="settings" type="button" class="plyr__control plyr__control--forward" role="menuitem" aria-haspopup="true"><span>Altyazılar<span class="plyr__menu__value">Türkçe</span></span></button><button data-plyr="settings" type="button" class="plyr__control plyr__control--forward" role="menuitem" aria-haspopup="true" hidden=""><span>Kalite<span class="plyr__menu__value">undefined</span></span></button><button data-plyr="settings" type="button" class="plyr__control plyr__control--forward" role="menuitem" aria-haspopup="true"><span>Hız<span class="plyr__menu__value">0.75×</span></span></button>`;
+  let captionSettingsButton1 = document.createElement("button");
+  captionSettingsButton1.setAttribute("data-plyr", "settings");
+  captionSettingsButton1.setAttribute("type", "button");
+  captionSettingsButton1.classList.add("plyr__control");
+  captionSettingsButton1.classList.add("plyr__control--forward");
+  captionSettingsButton1.setAttribute("role", "menuitem");  
+  captionSettingsButton1.innerHTML = `<span>Yazı boyutu<span id="selected-caption-size" class="plyr__menu__value">%${captionSize.percentage}</span></span>`;
+  captionSettingsButton1.addEventListener("click", (event)=>{
+    let children = parentMenu.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].setAttribute("hidden", "");
+    }
+    // remove hidden attribute from the caption settings menu
+    let captionSettingsMenu = document.getElementById(menuId + "-caption-size");
+    captionSettingsMenu.removeAttribute("hidden");
+  });
+  captionSettingsMenuDiv.appendChild(captionSettingsButton1);
+
+  let captionSettingsButton2 = document.createElement("button");
+  captionSettingsButton2.setAttribute("data-plyr", "settings");
+  captionSettingsButton2.setAttribute("type", "button");
+  captionSettingsButton2.classList.add("plyr__control");
+  captionSettingsButton2.classList.add("plyr__control--forward");
+  captionSettingsButton2.setAttribute("role", "menuitem");
+  captionSettingsButton2.innerHTML = `<span>Yazı rengi<span id="selected-caption-text-color" class="plyr__menu__value">${captionTextColor.colorText}</span></span>`;
+  captionSettingsButton2.addEventListener("click", (event)=>{
+    let children = parentMenu.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].setAttribute("hidden", "");
+    }
+    // remove hidden attribute from the caption settings menu
+    let captionSettingsMenu = document.getElementById(menuId + "-caption-text-color");
+    captionSettingsMenu.removeAttribute("hidden");
+  });
+  captionSettingsMenuDiv.appendChild(captionSettingsButton2);
+
+  let captionSettingsButton3 = document.createElement("button");
+  captionSettingsButton3.setAttribute("data-plyr", "settings");
+  captionSettingsButton3.setAttribute("type", "button");
+  captionSettingsButton3.classList.add("plyr__control");
+  captionSettingsButton3.classList.add("plyr__control--forward");
+  captionSettingsButton3.setAttribute("role", "menuitem");
+  captionSettingsButton3.innerHTML = `<span>Arkaplan rengi<span class="plyr__menu__value">${captionBackgroundColor.colorText}</span></span>`;
+  captionSettingsButton3.addEventListener("click", (event)=>{
+    let children = parentMenu.children;
+    for (let i = 0; i < children.length; i++) {
+      children[i].setAttribute("hidden", "");
+    }
+    // remove hidden attribute from the caption settings menu
+    let captionSettingsMenu = document.getElementById(menuId + "-caption-background-color");
+    captionSettingsMenu.removeAttribute("hidden");
+  });
+  captionSettingsMenuDiv.appendChild(captionSettingsButton3);
+
+  captionSettingsMenu.appendChild(captionSettingsMenuDiv);
+
+
+  parentMenu.appendChild(captionSettingsMenu);
+
+
+
+  let captionSizeMenu = document.createElement("div");
+  captionSizeMenu.setAttribute("id", menuId + "-caption-size");
+  captionSizeMenu.setAttribute("hidden", "");
+  let backMenuButton2 = document.createElement("button");
+  backMenuButton2.setAttribute("type", "button");
+  backMenuButton2.classList.add("plyr__control");
+  backMenuButton2.classList.add("plyr__control--back");
+  backMenuButton2.innerHTML = `<span aria-hidden="true">Yazı boyutu</span><span class="plyr__sr-only">Önceki menüye dön</span>`;
+  backMenuButton2.addEventListener("click", (event)=>{
+    captionSizeMenu.setAttribute("hidden", "");
+
+    // remove hidden attribute from the captions menu
+    let captionsMenu = document.getElementById(menuId + "-caption-settings");
+    captionsMenu.removeAttribute("hidden");
+  });
+
+  captionSizeMenu.appendChild(backMenuButton2);
+
+  let captionSizeMenuDiv = document.createElement("div");
+  captionSizeMenuDiv.setAttribute("role", "menu");
+
+  let sizes = player.isFullscreen ? captionSizesFullscreen : captionSizes;
+
+  sizes.forEach((size)=>{
+    let captionSizeButton = document.createElement("button");
+    captionSizeButton.setAttribute("type", "button");
+    captionSizeButton.classList.add("plyr__control", "caption_size_radio");
+    captionSizeButton.setAttribute("role", "menuitemradio");
+    captionSizeButton.setAttribute("aria-checked", captionSize.percentage === size.percentage ? "true" : "false");
+    captionSizeButton.setAttribute("value", size.percentage);
+    captionSizeButton.innerHTML = `<span>%${size.percentage}</span>`;
+    captionSizeButton.addEventListener("click", (event)=>{
+      setCaptionSize(size, true);
+    });
+    captionSizeMenuDiv.appendChild(captionSizeButton);
+  });
+
+  captionSizeMenu.appendChild(captionSizeMenuDiv);
+  parentMenu.appendChild(captionSizeMenu);
+
+
+
+  let captionTextColorMenu = document.createElement("div");
+  captionTextColorMenu.setAttribute("id", menuId + "-caption-text-color");
+  captionTextColorMenu.setAttribute("hidden", "");
+  let backMenuButton3 = document.createElement("button");
+  backMenuButton3.setAttribute("type", "button");
+  backMenuButton3.classList.add("plyr__control");
+  backMenuButton3.classList.add("plyr__control--back");
+  backMenuButton3.innerHTML = `<span aria-hidden="true">Yazı rengi</span><span class="plyr__sr-only">Önceki menüye dön</span>`;
+  backMenuButton3.addEventListener("click", (event)=>{
+    captionTextColorMenu.setAttribute("hidden", "");
+
+    // remove hidden attribute from the captions menu
+    let captionsMenu = document.getElementById(menuId + "-caption-settings");
+    captionsMenu.removeAttribute("hidden");
+  });
+
+  captionTextColorMenu.appendChild(backMenuButton3);
+
+  let captionTextColorMenuDiv = document.createElement("div");
+  captionTextColorMenuDiv.setAttribute("role", "menu");
+
+  captionColors.forEach((color)=>{
+    let captionTextColorButton = document.createElement("button");
+    captionTextColorButton.setAttribute("type", "button");
+    captionTextColorButton.classList.add("plyr__control", "caption_text_color_radio");
+    captionTextColorButton.setAttribute("role", "menuitemradio");
+    captionTextColorButton.setAttribute("aria-checked", captionTextColor.hex === color.hex ? "true" : "false");
+    captionTextColorButton.setAttribute("value", color.hex);
+    captionTextColorButton.innerHTML = `<span>${color.colorText}</span>`;
+    captionTextColorButton.addEventListener("click", (event)=>{
+      setCaptionTextColor(color, true);
+    });
+    captionTextColorMenuDiv.appendChild(captionTextColorButton);
+  });
+
+  captionTextColorMenu.appendChild(captionTextColorMenuDiv);
+
+  parentMenu.appendChild(captionTextColorMenu);
+
+  let captionBackgroundColorMenu = document.createElement("div");
+  captionBackgroundColorMenu.setAttribute("id", menuId + "-caption-background-color");
+  captionBackgroundColorMenu.setAttribute("hidden", "");
+  let backMenuButton4 = document.createElement("button");
+  backMenuButton4.setAttribute("type", "button");
+  backMenuButton4.classList.add("plyr__control");
+  backMenuButton4.classList.add("plyr__control--back");
+  backMenuButton4.innerHTML = `<span aria-hidden="true">Arkaplan rengi</span><span class="plyr__sr-only">Önceki menüye dön</span>`;
+  backMenuButton4.addEventListener("click", (event)=>{
+    captionBackgroundColorMenu.setAttribute("hidden", "");
+
+    // remove hidden attribute from the captions menu
+    let captionsMenu = document.getElementById(menuId + "-caption-settings");
+    captionsMenu.removeAttribute("hidden");
+  });
+
+  captionBackgroundColorMenu.appendChild(backMenuButton4);
+
+  let captionBackgroundColorMenuDiv = document.createElement("div");
+  captionBackgroundColorMenuDiv.setAttribute("role", "menu");
+
+  captionColors.forEach((color)=>{
+    let captionBackgroundColorButton = document.createElement("button");
+    captionBackgroundColorButton.setAttribute("type", "button");
+    captionBackgroundColorButton.classList.add("plyr__control", "caption_background_color_radio");
+    captionBackgroundColorButton.setAttribute("role", "menuitemradio");
+    captionBackgroundColorButton.setAttribute("aria-checked", captionBackgroundColor.hex === color.hex ? "true" : "false");
+    captionBackgroundColorButton.setAttribute("value", color.hex);
+    captionBackgroundColorButton.innerHTML = `<span>${color.colorText}</span>`;
+    captionBackgroundColorButton.addEventListener("click", (event)=>{
+      setCaptionBackgroundColor(color, true);
+    });
+    captionBackgroundColorMenuDiv.appendChild(captionBackgroundColorButton);
+  });
+
+  captionBackgroundColorMenu.appendChild(captionBackgroundColorMenuDiv);
+
+  parentMenu.appendChild(captionBackgroundColorMenu);
+
+
+  setCaptionSize(captionSize);
+  setCaptionTextColor(captionTextColor);
+  setCaptionBackgroundColor(captionBackgroundColor);
+
+}
+
+function setCaptionSize(val, showPlaceholderCaption = false){
+
+  captionSize = val;
+
+  let captionDiv = document.querySelector(".plyr__captions");
+  captionDiv.style.fontSize = captionSize.fontSize;
+
+  // get all buttons with class caption_size_radio and make aria-checked false for all except the clicked one
+  let captionSizeButtons = document.querySelectorAll(".caption_size_radio");
+  captionSizeButtons.forEach((button)=>{
+    button.setAttribute("aria-checked", "false");
+  });
+
+  let clickedButton = document.querySelector(`.caption_size_radio[value="${captionSize.percentage}"]`);
+  clickedButton.setAttribute("aria-checked", "true");
+
+  let selectedCaptionSize = document.getElementById("selected-caption-size");
+  selectedCaptionSize.innerHTML = `%${captionSize.percentage}`;
+
+  // save the caption size to the local storage
+  localStorage.setItem("captionSize", JSON.stringify(captionSize));
+
+  showPlaceholderCaption && addPlaceholderCaption();
+
+}
+
+function setCaptionTextColor(color, showPlaceholderCaption = false){
+  captionTextColor = color;
+
+  let captionDiv = document.querySelector(".plyr__captions");
+  captionDiv.style.color = captionTextColor.hex;
+
+  // make all children of the captionDiv have the same color
+  let children = captionDiv.children;
+  for(let i = 0; i < children.length; i++){
+    children[i].style.color = captionTextColor.hex;
+  }
+
+  // get all buttons with class caption_text_color_radio and make aria-checked false for all except the clicked one
+  let captionTextColorButtons = document.querySelectorAll(".caption_text_color_radio");
+  captionTextColorButtons.forEach((button)=>{
+    button.setAttribute("aria-checked", "false");
+  });
+
+  let clickedButton = document.querySelector(`.caption_text_color_radio[value="${captionTextColor.hex}"]`);
+  clickedButton.setAttribute("aria-checked", "true");
+
+  let selectedCaptionTextColor = document.getElementById("selected-caption-text-color");
+  selectedCaptionTextColor.innerHTML = captionTextColor.colorText;
+
+  // save the caption text color to the local storage
+  localStorage.setItem("captionTextColor", JSON.stringify(captionTextColor));
+
+  showPlaceholderCaption && addPlaceholderCaption();
+
+
+}
+
+function setCaptionBackgroundColor(color, showPlaceholderCaption = false){
+  captionBackgroundColor = color;
+  document.head.insertAdjacentHTML("beforeend", `<style>.player-captions .player-caption{background-color:` + captionBackgroundColor.hex + `;}</style>`);
+
+  // change the .plyr__caption css rules background-color property, i mean the css itself
+  let styleSheets = Object.values(document.styleSheets);
+
+  let plyrStyleSheet = styleSheets.find((styleSheet)=>{ return styleSheet.href.includes("custom.css")});
+  let cssRules = plyrStyleSheet.cssRules;
+  let plyr__captionRule = Array.from(cssRules).find((rule)=>{ return rule.selectorText === ".plyr__caption"});
+  if(plyr__captionRule){
+    plyr__captionRule.style.backgroundColor = captionBackgroundColor.hex;
+  }
+
+
+
+  // get all buttons with class caption_background_color_radio and make aria-checked false for all except the clicked one
+  let captionBackgroundColorButtons = document.querySelectorAll(".caption_background_color_radio");
+  captionBackgroundColorButtons.forEach((button)=>{
+    button.setAttribute("aria-checked", "false");
+  });
+
+  let clickedButton = document.querySelector(`.caption_background_color_radio[value="${captionBackgroundColor.hex}"]`);
+  clickedButton.setAttribute("aria-checked", "true");
+
+  // save the caption background color to the local storage
+  localStorage.setItem("captionBackgroundColor", JSON.stringify(captionBackgroundColor));
+
+  
+  showPlaceholderCaption && addPlaceholderCaption();
+
+
+}
+
+function loadLocalStorageSettings(){
+  let size = localStorage.getItem("captionSize");
+  if(size){
+    captionSize = JSON.parse(size);
+  }
+
+  let color = localStorage.getItem("captionTextColor");
+  if(color){
+    captionTextColor = JSON.parse(color);
+  }
+
+  let backgroundColor = localStorage.getItem("captionBackgroundColor");
+  if(backgroundColor){
+    captionBackgroundColor = JSON.parse(backgroundColor);
+  }
+}
+
+function addPlaceholderCaption(){
+
+  let dummyCaption = document.getElementById("dummy-caption");
+  if(dummyCaption){
+    return;
+  }
+
+  let isMenuOpen = player.elements.container.classList.contains("plyr--menu-open");
+  if(!isMenuOpen){
+
+    if(dummyCaption){
+      dummyCaption.remove();
+    }
+
+    return;
+
+  }
+
+  let captionDiv = document.querySelector(".plyr__captions");
+  // if there is any .plyr__caption element which is not empty, return
+  let captions = captionDiv.querySelectorAll(".plyr__caption");
+  for(let i = 0; i < captions.length; i++){
+    if(captions[i].innerHTML.trim() !== ""){
+      return;
+    }
+  }
+
+
+  let placeholderCaption = document.createElement("span");
+  placeholderCaption.classList.add("plyr__caption");
+  placeholderCaption.setAttribute("id", "dummy-caption");
+  placeholderCaption.innerHTML = "Altyazı böyle görünecek";
+  captionDiv.appendChild(placeholderCaption);
+
+
+
+  hidePlaceholderCaptionTimeout = setTimeout(()=>{
+    clearTimeout(hidePlaceholderCaptionTimeout);
+    // delete dummy caption from the dom
+    let dummyCaption = document.getElementById("dummy-caption");
+    if(dummyCaption){
+      dummyCaption.remove();
+    }
+  }, 5000);
+
+
 }
 
 function fastForward(){
