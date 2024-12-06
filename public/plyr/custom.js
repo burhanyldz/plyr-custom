@@ -145,7 +145,7 @@ function initPlayer(options) {
       points.push(application.marker);
     });
 
-    if (isTouchDevice()) {
+    if (isOnlyTouchDevice()) {
       hideControls = false;
     }
 
@@ -857,10 +857,8 @@ function showControls(){
   }
 }
 
-function isTouchDevice() {
-  return (('ontouchstart' in window) ||
-     (navigator.maxTouchPoints > 0) ||
-     (navigator.msMaxTouchPoints > 0));
+function isOnlyTouchDevice() {
+  return window.matchMedia("(any-hover: hover)").matches;
 }
 
 document.addEventListener("keydown", function (event) {
