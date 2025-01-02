@@ -4,7 +4,7 @@ var player;
 var currentTime = 0;
 var areControlsVisible = true;
 var controlTimeout;
-var hideControls = true;
+var hideControls = false;
 var hidePlaceholderCaptionTimeout = null;
 
 var captionSizes = [
@@ -857,8 +857,8 @@ function showControls(){
   }
 }
 
-function isOnlyTouchDevice() {
-  return window.matchMedia("(any-hover: hover)").matches;
+function isMouseConnected() {
+  return window.matchMedia("(pointer: fine)").matches;
 }
 
 document.addEventListener("keydown", function (event) {

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pointers</title>
+</head>
+
+<body>
+
+    <div class="pointer-types">
+        <div id="pointer-mouse" style="display: none;">Fare</div>
+        <div id="pointer-touch" style="display: none;">Dokunmatik</div>
+        <div id="pointer-touch-mouse" style="display: none;">Fare ve Dokunmatik</div>
+    </div>
+
+</body>
+
+<script>
+
+    function mouseOnlyDevice() {
+        return !window.matchMedia('(any-pointer: coarse)').matches;
+    }
+
+    function touchOnlyDevice() {
+        return !window.matchMedia('(any-pointer: fine)').matches;
+    }
+
+    function touchAndMouseDevice() {
+        return window.matchMedia('(any-pointer: fine)').matches && window.matchMedia('(any-pointer: coarse)').matches;
+    }
+
+
+    function deviceTypes() {
+        if (touchOnlyDevice()) {
+            document.getElementById("pointer-touch").style.display = "block";
+        }
+        if (mouseOnlyDevice()) {
+            document.getElementById("pointer-mouse").style.display = "block";
+        }
+        if (touchAndMouseDevice()) {
+            document.getElementById("pointer-touch-mouse").style.display = "block";
+        }
+    }
+
+    deviceTypes();
+</script>
+
+</html>
