@@ -145,7 +145,9 @@ function initPlayer(options) {
       points.push(application.marker);
     });
 
-    if (isOnlyTouchDevice()) {
+    if (isMouseConnected()) {
+      hideControls = true;
+    }else{
       hideControls = false;
     }
 
