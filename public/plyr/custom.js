@@ -726,7 +726,7 @@ function setCaptionBackgroundColor(color, showPlaceholderCaption = false){
   // change the .plyr__caption css rules background-color property, i mean the css itself
   let styleSheets = Object.values(document.styleSheets);
 
-  let plyrStyleSheet = styleSheets.find((styleSheet)=>{ return styleSheet.href.includes("custom.css")});
+  let plyrStyleSheet = styleSheets.find((styleSheet)=>{ return styleSheet.href && styleSheet.href.includes("custom.css")});
   let cssRules = plyrStyleSheet.cssRules;
   let plyr__captionRule = Array.from(cssRules).find((rule)=>{ return rule.selectorText === ".plyr__caption"});
   if(plyr__captionRule){
