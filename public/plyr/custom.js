@@ -80,22 +80,191 @@ var topicListButtonClicked = function () {
   // İŞLEM YAPILACAK
 };
 
-// sayfa yüklenir yüklenmez playerı başlat
+// Dual mode initialization - supports both immediate and click-to-load
 document.addEventListener("DOMContentLoaded", function () {
-  initPlayer({
-    applications: applications,
-    topicListButtonClicked: topicListButtonClicked,
-    pauseOnApplication: true, // uygulamaların zamanına gelindiğinde videoyu duraklat
-    subject: subject,
-    subTopic: subTopic,
-  }).then((player) => {
-    var duration = player.duration; // Duration almak için
-    console.log("duration ", duration);
+  const videoElement = document.getElementById("player");
+  const placeholder = document.getElementById("video-placeholder");
+  
+  if (videoElement && !placeholder) {
+    // Original mode: Video element already exists in DOM
+    console.log("Original mode: Video elementi mevcut, hemen başlatılıyor...");
+    initPlayer({
+      applications: applications,
+      topicListButtonClicked: topicListButtonClicked,
+      pauseOnApplication: true,
+      subject: subject,
+      subTopic: subTopic,
+    }).then((player) => {
+      var duration = player.duration;
+      console.log("duration ", duration);
 
-    var durationTime = durationToTime(duration);
-    console.log("durationTime ", durationTime);
-  });
+      var durationTime = durationToTime(duration);
+      console.log("durationTime ", durationTime);
+      
+      initialized = true;
+      console.log("Original mode: Video başarıyla başlatıldı");
+    }).catch((error) => {
+      console.error("Original mode video initialization failed:", error);
+    });
+  } else if (placeholder && !videoElement) {
+    // Deferred mode: Only placeholder exists
+    console.log("Deferred mode: Video placeholder hazır - video tıklandığında yüklenecek.");
+  } else if (videoElement && placeholder) {
+    console.warn("Both video element and placeholder found. Using original mode.");
+    // Use original mode if both exist
+    initPlayer({
+      applications: applications,
+      topicListButtonClicked: topicListButtonClicked,
+      pauseOnApplication: true,
+      subject: subject,
+      subTopic: subTopic,
+    }).then((player) => {
+      var duration = player.duration;
+      console.log("duration ", duration);
+
+      var durationTime = durationToTime(duration);
+      console.log("durationTime ", durationTime);
+      
+      initialized = true;
+      console.log("Mixed mode: Video başarıyla başlatıldı (original mode kullanıldı)");
+    }).catch((error) => {
+      console.error("Mixed mode video initialization failed:", error);
+    });
+  } else {
+    console.error("Neither video element nor placeholder found!");
+  }
 });
+
+// Video'ya tıklandığında çağrılan fonksiyon
+function initializeVideoOnClick(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  if (initialized) {
+    // Video zaten yüklüyse, normal togglePlay fonksiyonunu çağır
+    togglePlay(event);
+    return;
+  }
+  
+  const videoContainer = document.getElementById("video-container");
+  const placeholder = document.getElementById("video-placeholder");
+  
+  if (!videoContainer || !placeholder) {
+    console.error("Video container veya placeholder bulunamadı");
+    return;
+  }
+  
+  // Loading state'i göster
+  videoContainer.classList.add('loading');
+  
+  // Placeholder'ı gizle
+  placeholder.style.display = 'none';
+  
+  // Video elementini dinamik olarak oluştur ve DOM'a ekle
+  createVideoElement()
+    .then(() => {
+      // Video element oluşturulduktan sonra Plyr'i başlat
+      return initPlayer({
+        applications: applications,
+        topicListButtonClicked: topicListButtonClicked,
+        pauseOnApplication: true,
+        subject: subject,
+        subTopic: subTopic,
+      });
+    })
+    .then((player) => {
+      var duration = player.duration;
+      console.log("duration ", duration);
+
+      var durationTime = durationToTime(duration);
+      console.log("durationTime ", durationTime);
+      
+      initialized = true;
+      
+      // Loading state'i kaldır
+      videoContainer.classList.remove('loading');
+      
+      // Video'yu otomatik olarak başlat
+      setTimeout(() => {
+        player.play();
+      }, 500);
+      
+      console.log("Video başarıyla yüklendi ve oynatılmaya başlandı");
+    })
+    .catch((error) => {
+      console.error("Video yükleme hatası:", error);
+      
+      // Hata durumunda placeholder'ı tekrar göster
+      placeholder.style.display = 'block';
+      videoContainer.classList.remove('loading');
+      
+      // Kullanıcıya hata mesajı göster
+      alert("Video yüklenirken bir hata oluştu. Lütfen tekrar deneyin.");
+    });
+}
+
+// Video elementini dinamik olarak oluşturan fonksiyon
+function createVideoElement() {
+  return new Promise((resolve, reject) => {
+    try {
+      const videoContainer = document.getElementById("video-container");
+      
+      // Video elementini oluştur
+      const videoElement = document.createElement('video');
+      videoElement.id = 'player';
+      videoElement.crossOrigin = 'anonymous';
+      videoElement.setAttribute('data-poster', 'plyr/View_From_A_Blue_Moon_Trailer-HD.jpg');
+      videoElement.controls = true; // Fallback için
+      
+      // Video source'unu ekle
+      const source = document.createElement('source');
+      source.src = 'plyr/View_From_A_Blue_Moon_Trailer-1080p.mp4';
+      source.type = 'video/mp4';
+      videoElement.appendChild(source);
+      
+      // Türkçe altyazı track'i
+      const trackTR = document.createElement('track');
+      trackTR.kind = 'captions';
+      trackTR.label = 'Türkçe';
+      trackTR.srclang = 'tr';
+      trackTR.src = 'plyr/sub.tr.vtt';
+      trackTR.default = true;
+      videoElement.appendChild(trackTR);
+      
+      // İngilizce altyazı track'i
+      const trackEN = document.createElement('track');
+      trackEN.kind = 'captions';
+      trackEN.label = 'English';
+      trackEN.srclang = 'en';
+      trackEN.src = 'plyr/sub.en.vtt';
+      videoElement.appendChild(trackEN);
+      
+      // Video elementini container'a ekle
+      videoContainer.appendChild(videoElement);
+      
+      console.log("Video element DOM'a eklendi");
+      resolve();
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
+}
+
+// Eski Intersection Observer kodunu kaldır - artık kullanmıyoruz
+function setupDeferredVideoInitialization() {
+  console.log("Click-to-load modunda çalışıyor - Intersection Observer devre dışı");
+}
+
+// Manuel başlatma fonksiyonu - click-to-load için güncelle
+function manualInitPlayer() {
+  if (!initialized) {
+    console.log("Manuel video başlatma tetiklendi...");
+    initializeVideoOnClick({ preventDefault: () => {}, stopPropagation: () => {} });
+  } else {
+    console.log("Video zaten başlatılmış");
+  }
+}
 
 togglePlay = function (event) {
   // Videoya tıklanıldığında oynat/duraklat
