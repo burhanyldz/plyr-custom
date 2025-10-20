@@ -6,6 +6,7 @@ var areControlsVisible = true;
 var controlTimeout;
 var hideControls = false;
 var hidePlaceholderCaptionTimeout = null;
+var deferShown = false;
 
 var captionSizes = [
   {percentage: 25, fontSize: "12px"},
@@ -88,6 +89,9 @@ document.addEventListener("DOMContentLoaded", function () {
     pauseOnApplication: true, // uygulamaların zamanına gelindiğinde videoyu duraklat
     subject: subject,
     subTopic: subTopic,
+    withDefer: true, // defer özelliğini aktifleştir
+    deferMessage: "Sadece bireysel öğrenme içindir. Amacı dışında kullanılmamalıdır.", // gösterilecek mesaj
+    deferDuration: 3000, // milisaniye cinsinden bekleme süresi
   }).then((player) => {
     var duration = player.duration; // Duration almak için
     console.log("duration ", duration);
@@ -132,6 +136,11 @@ function durationToTime(seconds) {
   }
 }
 
+// Masaüstü boyutunu kontrol eden fonksiyon
+function isDesktopSize() {
+  return window.innerWidth >= 768; // 768px ve üzeri masaüstü kabul edilir
+}
+
 /* -------------------------------------------------------------------------- */
 /*                                PLAYER İŞLEMLERİ                            */
 /* -------------------------------------------------------------------------- */
@@ -139,6 +148,9 @@ function initPlayer(options) {
   return new Promise((resolve, reject) => {
     var applications = options.applications;
     var pauseOnApplication = options.pauseOnApplication;
+    var withDefer = options.withDefer || false;
+    var deferMessage = options.deferMessage || "Lütfen bekleyin...";
+    var deferDuration = options.deferDuration || 2000;
 
     var points = [];
     applications.forEach(function (application) {
@@ -232,6 +244,35 @@ function initPlayer(options) {
         player.on("play", (event) => {
           if (!firstPlay) {
             firstPlay = true;
+            
+            // Defer özelliği aktifse ve masaüstü boyutundaysa
+            if (withDefer && isDesktopSize() && !deferShown) {
+              deferShown = true;
+              player.pause(); // Videoyu durdur
+              
+              // Defer mesajı elementini oluştur
+              let deferOverlay = document.createElement("div");
+              deferOverlay.classList.add("defer-overlay");
+              deferOverlay.innerHTML = `
+                <span class="defer-message">
+                  <p>${deferMessage}</p>
+                </span>
+              `;
+              playerContainer.appendChild(deferOverlay);
+              
+              // Belirtilen süre sonra fade out yap ve videoyu başlat
+              setTimeout(() => {
+                deferOverlay.classList.add("fade-out");
+                
+                // Fade out animasyonu tamamlandıktan sonra elementi kaldır ve videoyu başlat
+                setTimeout(() => {
+                  deferOverlay.remove();
+                  player.play();
+                }, 500); // fade out animasyon süresi
+                
+              }, deferDuration);
+            }
+            
             subjectDiv.style.display = "none";
             subTopicDiv.style.display = "none";
 
