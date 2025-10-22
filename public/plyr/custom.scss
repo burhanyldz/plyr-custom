@@ -21,6 +21,7 @@ body {
 .desktop-frame{
     width: 1200px;
     max-width: 100%;
+    margin-top: 100px;
 }
 
 .top-menu-container{
@@ -240,20 +241,60 @@ body {
   opacity: 0;
 }
 
-.defer-message {
-    background-color: rgba(255, 255, 255, 0.95);
-    color: #333;
-    padding: 30px 50px;
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-    font-family: Inter, Helvetica, sans-serif;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
+.defer-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.defer-message p {
-  margin: 0;
+.countdown-circle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 80px;
+  height: 80px;
+}
+
+.countdown-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.countdown-circle-bg {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.2);
+  stroke-width: 8;
+}
+
+.countdown-circle-progress {
+  fill: none;
+  stroke: #000000;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.countdown-number {
+  position: absolute;
+}
+.countdown-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 28px;
+    font-weight: bold;
+    color: black;
+    text-shadow: 0 2px 4px rgba(255, 255, 255, 0.5);
+    font-family: Inter, Helvetica, sans-serif;
+    background-color: rgba(0, 0, 0, 0.155);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

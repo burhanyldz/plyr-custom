@@ -89,9 +89,8 @@ document.addEventListener("DOMContentLoaded", function () {
     pauseOnApplication: true, // uygulamaların zamanına gelindiğinde videoyu duraklat
     subject: subject,
     subTopic: subTopic,
-    withDefer: true, // defer özelliğini aktifleştir
-    deferMessage: "Sadece bireysel öğrenme içindir. Amacı dışında kullanılmamalıdır.", // gösterilecek mesaj
-    deferDuration: 3000, // milisaniye cinsinden bekleme süresi
+    withDefer: true, // defer özelliğini aktifleştir (spot.png gösterir)
+    deferDuration: 10000, // milisaniye cinsinden bekleme süresi
   }).then((player) => {
     var duration = player.duration; // Duration almak için
     console.log("duration ", duration);
@@ -137,8 +136,8 @@ function durationToTime(seconds) {
 }
 
 // Masaüstü boyutunu kontrol eden fonksiyon
-function isDesktopSize() {
-  return window.innerWidth >= 768; // 768px ve üzeri masaüstü kabul edilir
+function isTouchDesktop() {
+  return window.innerWidth >= 1024 && 'ontouchstart' in window;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -149,8 +148,7 @@ function initPlayer(options) {
     var applications = options.applications;
     var pauseOnApplication = options.pauseOnApplication;
     var withDefer = options.withDefer || false;
-    var deferMessage = options.deferMessage || "Lütfen bekleyin...";
-    var deferDuration = options.deferDuration || 2000;
+    var deferDuration = options.deferDuration || 5000;
 
     var points = [];
     applications.forEach(function (application) {
@@ -246,22 +244,53 @@ function initPlayer(options) {
             firstPlay = true;
             
             // Defer özelliği aktifse ve masaüstü boyutundaysa
-            if (withDefer && isDesktopSize() && !deferShown) {
+            if (withDefer && isTouchDesktop() && !deferShown) {
               deferShown = true;
               player.pause(); // Videoyu durdur
               
-              // Defer mesajı elementini oluştur
+              // Defer overlay elementini oluştur (spot.png görseli ile)
               let deferOverlay = document.createElement("div");
               deferOverlay.classList.add("defer-overlay");
               deferOverlay.innerHTML = `
-                <span class="defer-message">
-                  <p>${deferMessage}</p>
-                </span>
+                <img src="plyr/spot.png" alt="Spot" class="defer-image">
+                <div class="countdown-circle">
+                  <svg class="countdown-svg" viewBox="0 0 100 100">
+                    <circle class="countdown-circle-bg" cx="50" cy="50" r="45"></circle>
+                    <circle class="countdown-circle-progress" cx="50" cy="50" r="45"></circle>
+                  </svg>
+                  <div class="countdown-number"></div>
+                </div>
               `;
               playerContainer.appendChild(deferOverlay);
               
+              // Countdown logic
+              const countdownNumber = deferOverlay.querySelector('.countdown-number');
+              const progressCircle = deferOverlay.querySelector('.countdown-circle-progress');
+              const totalSeconds = Math.ceil(deferDuration / 1000);
+              const circumference = 2 * Math.PI * 45; // radius is 45
+              
+              progressCircle.style.strokeDasharray = circumference;
+              progressCircle.style.strokeDashoffset = 0;
+              
+              let remainingSeconds = totalSeconds;
+              countdownNumber.textContent = remainingSeconds;
+              
+              const countdownInterval = setInterval(() => {
+                remainingSeconds--;
+                countdownNumber.textContent = remainingSeconds;
+                
+                const progress = remainingSeconds / totalSeconds;
+                const offset = circumference * (1 - progress);
+                progressCircle.style.strokeDashoffset = offset;
+                
+                if (remainingSeconds <= 0) {
+                  clearInterval(countdownInterval);
+                }
+              }, 1000);
+              
               // Belirtilen süre sonra fade out yap ve videoyu başlat
               setTimeout(() => {
+                clearInterval(countdownInterval);
                 deferOverlay.classList.add("fade-out");
                 
                 // Fade out animasyonu tamamlandıktan sonra elementi kaldır ve videoyu başlat
