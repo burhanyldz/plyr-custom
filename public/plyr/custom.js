@@ -137,7 +137,8 @@ function durationToTime(seconds) {
 
 // Masaüstü boyutunu kontrol eden fonksiyon
 function isTouchDesktop() {
-  return window.innerWidth >= 1024 && 'ontouchstart' in window;
+  // Check if screen is desktop size (>=1024px) AND has touch capability
+  return window.innerWidth >= 1024 && window.matchMedia('(any-pointer: coarse)').matches;
 }
 
 /* -------------------------------------------------------------------------- */
