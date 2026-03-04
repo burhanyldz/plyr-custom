@@ -298,3 +298,13 @@ body {
     align-items: center;
     justify-content: center;
 }
+
+.plyr--paused:not(.plyr--stopped) {
+    .plyr__control {
+        opacity: 0.35;
+
+        &:hover {
+            opacity: 1;
+        }
+    }
+}

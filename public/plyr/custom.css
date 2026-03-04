@@ -283,4 +283,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.plyr--paused:not(.plyr--stopped) .plyr__control {
+  opacity: 0.35;
+}
+.plyr--paused:not(.plyr--stopped) .plyr__control:hover {
+  opacity: 1;
 }/*# sourceMappingURL=custom.css.map */
